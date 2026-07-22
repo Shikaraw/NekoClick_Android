@@ -1,0 +1,63 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:  # 手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk \
+            python3-pip autoconf libtool pkg-config zlib1g-dev \
+            libncurses5-dev libncursesw5-dev libtinfo5 cmake \
+            libffi-dev libssl-dev python3-venv ccache curl
+
+      - name: Install Buildozer
+        run: pip install --user buildozer
+
+      - name: Cache Android SDK/NDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            ~/.local/share/buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+
+      - name: Build APK with Buildozer
+        run: |
+          export PATH=$PATH:~/.local/bin
+          buildozer android debug
+
+      - name: Find APK
+        run: |
+          echo "=== 搜索 APK 文件 ==="
+          find . -name "*.apk" -type f 2>/dev/null || true
+          echo "=== bin/ 目录 ==="
+          ls -la bin/ 2>/dev/null || echo "bin/ 不存在"
+          echo "=== dist/ 目录 ==="
+          ls -la dist/ 2>/dev/null || echo "dist/ 不存在"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NekoClick-APK
+          path: |
+            dist/*.apk
+            bin/*.apk
