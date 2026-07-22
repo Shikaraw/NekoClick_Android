@@ -20,11 +20,8 @@ presplash.color = #F5F5F5
 # 图标
 icon.filename = nekoclick_icon.png
 
-# Java 源码目录（无障碍服务）
+# Java 源码目录（无障碍服务 + manifest 合并）
 android.add_src = src/
-
-# 自定义 AndroidManifest（用于声明无障碍服务）
-android.manifest = AndroidManifest.xml
 
 # 权限
 android.permissions = INTERNET,VIBRATE

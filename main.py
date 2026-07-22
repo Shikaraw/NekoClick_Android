@@ -21,24 +21,15 @@ from kivy.utils import platform
 
 # ─────────────────── 平台判断 ───────────────────
 IS_ANDROID = platform == 'android'
+_as_available = False
 
-if IS_ANDROID:
-    try:
-        from jnius import autoclass
-        # 获取 PythonActivity 上下文
-        PythonActivity = autoclass('org.kivy.android.PythonActivity')
-        current_activity = PythonActivity.mActivity
-        Intent = autoclass('android.content.Intent')
-        Settings = autoclass('android.provider.Settings')
-
-        # 引用我们的无障碍服务
-        NekoClickService = autoclass('org.nekoclick.NekoClickService')
-        _as_available = True
-    except Exception as e:
-        print(f'[NekoClick] pyjnius 导入失败: {e}')
-        _as_available = False
-else:
-    _as_available = False
+# ────────── pyjnius 相关引用（延迟加载，在 build() 中初始化）──────────
+# 这些变量在 _init_jnius() 中赋值
+PythonActivity = None
+current_activity = None
+Intent = None
+Settings = None
+NekoClickService = None
 
 
 # ─────────────────── 操作类型 ───────────────────
@@ -288,6 +279,8 @@ class NekoClickApp(App):
     title = 'NekoClick'
 
     def build(self):
+        # 延迟初始化 pyjnius（避免模块级别导入导致 C 层崩溃）
+        NekoClickApp._init_jnius()
         Window.clearcolor = (0.96, 0.96, 0.96, 1)
         self.cards = []
         self._check_service()
@@ -357,6 +350,29 @@ class NekoClickApp(App):
     def _hex(h):
         h = h.lstrip('#')
         return tuple(int(h[i:i + 2], 16) / 255.0 for i in (0, 2, 4)) + (1,)
+
+    @staticmethod
+    def _init_jnius():
+        """延迟初始化 pyjnius，在 build() 中调用而非模块级别"""
+        global _as_available, PythonActivity, current_activity
+        global Intent, Settings, NekoClickService
+
+        if not IS_ANDROID or _as_available:
+            return
+
+        try:
+            from jnius import autoclass
+            cls_activity = autoclass('org.kivy.android.PythonActivity')
+            PythonActivity = cls_activity
+            current_activity = cls_activity.mActivity
+            Intent = autoclass('android.content.Intent')
+            Settings = autoclass('android.provider.Settings')
+            NekoClickService = autoclass('org.nekoclick.NekoClickService')
+            _as_available = True
+            print('[NekoClick] pyjnius 初始化成功')
+        except Exception as e:
+            print(f'[NekoClick] pyjnius 初始化失败: {e}')
+            _as_available = False
 
     def _check_service(self):
         """检查无障碍服务状态"""
