@@ -14,7 +14,7 @@ source.exclude_dirs = tests
 source.exclude_exts = spec
 
 # 构建参数
-requirements = python3==3.12.9,kivy
+requirements = python3,kivy
 presplash.color = #F5F5F5
 
 # 图标
