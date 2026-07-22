@@ -3,15 +3,12 @@ NekoClick — 移动版自动点击器 (Kivy + AccessibilityService)
 适用于 Android，通过无障碍服务模拟点击操作（无需 ADB、无需 Root）
 """
 import os
-import sys
-import json
 import threading
 import time as time_module
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.button import Button
 from kivy.uix.togglebutton import ToggleButton
@@ -19,25 +16,20 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.filechooser import FileChooserListView
-from kivy.uix.progressbar import ProgressBar
-from kivy.uix.stacklayout import StackLayout
 from kivy.metrics import dp
 from kivy.utils import platform
-from kivy.graphics import Color, RoundedRectangle
 
 # ─────────────────── 平台判断 ───────────────────
 IS_ANDROID = platform == 'android'
 
 if IS_ANDROID:
     try:
-        from jnius import autoclass, cast
+        from jnius import autoclass
         # 获取 PythonActivity 上下文
         PythonActivity = autoclass('org.kivy.android.PythonActivity')
         current_activity = PythonActivity.mActivity
-        Context = autoclass('android.content.Context')
         Intent = autoclass('android.content.Intent')
         Settings = autoclass('android.provider.Settings')
-        Uri = autoclass('android.net.Uri')
 
         # 引用我们的无障碍服务
         NekoClickService = autoclass('org.nekoclick.NekoClickService')

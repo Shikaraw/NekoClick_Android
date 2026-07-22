@@ -27,7 +27,7 @@ android.add_src = src/
 android.manifest = AndroidManifest.xml
 
 # 权限
-android.permissions = INTERNET,VIBRATE,BIND_ACCESSIBILITY_SERVICE
+android.permissions = INTERNET,VIBRATE
 android.api = 34
 android.minapi = 24
 android.ndk = 28c
