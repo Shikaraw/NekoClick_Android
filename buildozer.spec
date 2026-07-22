@@ -14,7 +14,7 @@ source.exclude_dirs = tests
 source.exclude_exts = spec
 
 # 构建参数
-requirements = python3,kivy,pyjnius,android
+requirements = hostpython3==3.12.9,python3==3.12.9,kivy,pyjnius,android
 presplash.color = #F5F5F5
 
 # 图标
